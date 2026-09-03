@@ -41,7 +41,7 @@ var __vite_rsc_assets_manifest_default = {
 	},
 	"serverResources": { "app/layout.tsx": {
 		"js": [],
-		"css": ["/assets/index-UDtaV9qa.css"]
+		"css": ["/assets/index-BA2U5B4F.css"]
 	} }
 };
 //#endregion
@@ -11625,7 +11625,7 @@ var client_references_default = {
 		};
 	},
 	"6efdf509a785": async () => {
-		const m = await import("./page-C4F7bz1g.mjs");
+		const m = await import("./page-BxH_rYFQ.mjs");
 		return { get "default"() {
 			return m["default"];
 		} };
