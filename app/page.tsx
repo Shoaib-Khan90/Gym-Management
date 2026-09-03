@@ -7,8 +7,81 @@ const seedTrainers:Row[]=[{id:11,name:"Ahmed Raza",specialty:"Strength & Conditi
 const seedPlans:Row[]=[{id:21,name:"Basic",duration:"1 Month",price:3000,features:"Gym floor, Locker access",status:"Active"},{id:22,name:"Standard",duration:"3 Months",price:8000,features:"Gym floor, Group classes, Diet guide",status:"Active"},{id:23,name:"Premium",duration:"6 Months",price:15000,features:"All access, Personal trainer, Custom plans",status:"Active"}];
 const seedWorkouts:Row[]=[{id:31,name:"Lean Muscle Builder",member:"Ali Raza",type:"Workout",schedule:"5 days/week"},{id:32,name:"Fat Loss Starter",member:"Sara Khan",type:"Workout",schedule:"4 days/week"},{id:33,name:"High Protein Plan",member:"Ayesha Noor",type:"Diet",schedule:"Daily"}];
 const read=(k:string,f:Row[])=>{if(typeof window==='undefined')return f;try{return JSON.parse(localStorage.getItem(k)||'')||f}catch{return f}};
-export default function App(){const[view,setView]=useState('landing'),[tab,setTab]=useState('Overview'),[dark,setDark]=useState(false),[members,setMembers]=useState(()=>read('gym-members',seedMembers)),[trainers,setTrainers]=useState(()=>read('gym-trainers',seedTrainers)),[plans,setPlans]=useState(()=>read('gym-plans',seedPlans)),[workouts,setWorkouts]=useState(()=>read('gym-workouts',seedWorkouts));useEffect(()=>{localStorage.setItem('gym-members',JSON.stringify(members));localStorage.setItem('gym-trainers',JSON.stringify(trainers));localStorage.setItem('gym-plans',JSON.stringify(plans));localStorage.setItem('gym-workouts',JSON.stringify(workouts))},[members,trainers,plans,workouts]);useEffect(()=>document.documentElement.classList.toggle('dark',dark),[dark]);if(view==='landing')return <Landing login={()=>setView('login')}/>;if(view==='login'||view==='forgot')return <Auth forgot={view==='forgot'} back={()=>setView('landing')} done={()=>setView(view==='forgot'?'login':'dashboard')} switcher={()=>setView(view==='login'?'forgot':'login')}/>;return <Dashboard tab={tab} setTab={setTab} dark={dark} setDark={setDark} logout={()=>{setView('landing');setTab('Overview')}} data={{members,trainers,plans,workouts}} setters={{setMembers,setTrainers,setPlans,setWorkouts}}/>}
-function Landing({login}:{login:()=>void}){const[menu,setMenu]=useState(false);return <div className="landing"><header className="public-nav"><b><Flame/>IRON<span>CORE</span></b><nav className={menu?'open':''}><a href="#about">About</a><a href="#services">Services</a><a href="#plans">Memberships</a><a href="#trainers">Trainers</a><a href="#contact">Contact</a></nav><div><button onClick={login}>Admin Login</button><a className="lime" href="#plans">Join now</a><button className="hamb" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div></header><main><section className="hero"><div><span>STRONGER EVERY DAY</span><h1>Build strength.<br/>Build <em>yourself.</em></h1><p>Expert coaching, premium equipment and a community that keeps you moving forward.</p><div className="hero-actions"><a className="lime" href="#plans">Explore memberships <ArrowRight/></a><button className="outline" onClick={login}>Member login</button></div></div><aside><b>1,200+<small>Active members</small></b><b>24/7<small>Gym access</small></b><b>12+<small>Expert trainers</small></b></aside></section><section id="about" className="about"><div/><article><Kicker>ABOUT IRONCORE</Kicker><h2>Training built around your goals.</h2><p>IronCore combines serious equipment, expert coaching and a welcoming community. Whether you are starting your first workout or chasing your next personal best, we give you the tools and support to succeed.</p>{['Certified personal trainers','Modern strength and cardio equipment','Customized workout and diet plans','Clean, secure 24/7 facility'].map(x=><span key={x}><Check/>{x}</span>)}</article></section><section id="services" className="section black"><Heading kicker="WHAT WE OFFER" title="Everything you need to progress"/><div className="service-grid"><Card icon={<Dumbbell/>} title="Strength training" text="Premium free weights and machines for every training level."/><Card icon={<Activity/>} title="Cardio & conditioning" text="High-energy programs that improve endurance and performance."/><Card icon={<UserCheck/>} title="Personal coaching" text="One-on-one guidance tailored to your goals."/><Card icon={<Apple/>} title="Nutrition plans" text="Practical meal guidance that supports your training."/></div></section><section id="plans" className="section"><Heading kicker="MEMBERSHIPS" title="Choose your level"/><div className="price-grid">{seedPlans.map((p,i)=><article className={i===1?'featured':''} key={p.id}><h3>{p.name}</h3><p><b>Rs. {Number(p.price).toLocaleString()}</b> / {p.duration}</p>{String(p.features).split(', ').map(x=><span key={x}><Check/>{x}</span>)}<button onClick={login}>Get started</button></article>)}</div></section><section id="trainers" className="section trainers"><Heading kicker="THE COACHES" title="Train with the best"/><div className="coach-grid">{seedTrainers.map((t,i)=><article key={t.id}><div className={`coach c${i}`}/><h3>{t.name}</h3><p>{t.specialty}</p><small>{t.experience} experience</small></article>)}</div></section><section id="contact" className="contact"><article><Kicker>READY TO START?</Kicker><h2>Your strongest chapter begins today.</h2><p><Phone/> +92 300 1234567</p><p><Mail/> hello@ironcore.pk</p><p>Gulshan-e-Iqbal, Karachi</p></article><form onSubmit={e=>{e.preventDefault();alert('Message sent!');e.currentTarget.reset()}}><input required placeholder="Full name"/><input required type="email" placeholder="Email address"/><textarea required placeholder="How can we help?"/><button>Send message <ArrowRight/></button></form></section></main><footer className="landing-footer"><b><Flame/> IRON<span>CORE</span></b><p>© 2026 IronCore Fitness. Karachi, Pakistan.</p></footer></div>}
+export default function App() {
+  const [view, setView] = useState("landing");
+  const [tab, setTab] = useState("Overview");
+  const [dark, setDark] = useState(false);
+
+  const [members, setMembers] = useState(() =>
+    read("gym-members", seedMembers)
+  );
+
+  const [trainers, setTrainers] = useState(() =>
+    read("gym-trainers", seedTrainers)
+  );
+
+  const [plans, setPlans] = useState(() =>
+    read("gym-plans", seedPlans)
+  );
+
+  const [workouts, setWorkouts] = useState(() =>
+    read("gym-workouts", seedWorkouts)
+  );
+
+  useEffect(() => {
+    localStorage.setItem("gym-members", JSON.stringify(members));
+    localStorage.setItem("gym-trainers", JSON.stringify(trainers));
+    localStorage.setItem("gym-plans", JSON.stringify(plans));
+    localStorage.setItem("gym-workouts", JSON.stringify(workouts));
+  }, [members, trainers, plans, workouts]);
+
+  // FIXED DARK MODE
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, [dark]);
+
+  if (view === "landing") {
+    return <Landing login={() => setView("login")} />;
+  }
+
+  if (view === "login" || view === "forgot") {
+    return (
+      <Auth
+        forgot={view === "forgot"}
+        back={() => setView("landing")}
+        done={() => setView(view === "forgot" ? "login" : "dashboard")}
+        switcher={() =>
+          setView(view === "login" ? "forgot" : "login")
+        }
+      />
+    );
+  }
+
+  return (
+    <Dashboard
+      tab={tab}
+      setTab={setTab}
+      dark={dark}
+      setDark={setDark}
+      logout={() => {
+        setView("landing");
+        setTab("Overview");
+      }}
+      data={{
+        members,
+        trainers,
+        plans,
+        workouts,
+      }}
+      setters={{
+        setMembers,
+        setTrainers,
+        setPlans,
+        setWorkouts,
+      }}
+    />
+  );
+}function Landing({login}:{login:()=>void}){const[menu,setMenu]=useState(false);return <div className="landing"><header className="public-nav"><b><Flame/>IRON<span>CORE</span></b><nav className={menu?'open':''}><a href="#about">About</a><a href="#services">Services</a><a href="#plans">Memberships</a><a href="#trainers">Trainers</a><a href="#contact">Contact</a></nav><div><button onClick={login}>Admin Login</button><a className="lime" href="#plans">Join now</a><button className="hamb" onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div></header><main><section className="hero"><div><span>STRONGER EVERY DAY</span><h1>Build strength.<br/>Build <em>yourself.</em></h1><p>Expert coaching, premium equipment and a community that keeps you moving forward.</p><div className="hero-actions"><a className="lime" href="#plans">Explore memberships <ArrowRight/></a><button className="outline" onClick={login}>Member login</button></div></div><aside><b>1,200+<small>Active members</small></b><b>24/7<small>Gym access</small></b><b>12+<small>Expert trainers</small></b></aside></section><section id="about" className="about"><div/><article><Kicker>ABOUT IRONCORE</Kicker><h2>Training built around your goals.</h2><p>IronCore combines serious equipment, expert coaching and a welcoming community. Whether you are starting your first workout or chasing your next personal best, we give you the tools and support to succeed.</p>{['Certified personal trainers','Modern strength and cardio equipment','Customized workout and diet plans','Clean, secure 24/7 facility'].map(x=><span key={x}><Check/>{x}</span>)}</article></section><section id="services" className="section black"><Heading kicker="WHAT WE OFFER" title="Everything you need to progress"/><div className="service-grid"><Card icon={<Dumbbell/>} title="Strength training" text="Premium free weights and machines for every training level."/><Card icon={<Activity/>} title="Cardio & conditioning" text="High-energy programs that improve endurance and performance."/><Card icon={<UserCheck/>} title="Personal coaching" text="One-on-one guidance tailored to your goals."/><Card icon={<Apple/>} title="Nutrition plans" text="Practical meal guidance that supports your training."/></div></section><section id="plans" className="section"><Heading kicker="MEMBERSHIPS" title="Choose your level"/><div className="price-grid">{seedPlans.map((p,i)=><article className={i===1?'featured':''} key={p.id}><h3>{p.name}</h3><p><b>Rs. {Number(p.price).toLocaleString()}</b> / {p.duration}</p>{String(p.features).split(', ').map(x=><span key={x}><Check/>{x}</span>)}<button onClick={login}>Get started</button></article>)}</div></section><section id="trainers" className="section trainers"><Heading kicker="THE COACHES" title="Train with the best"/><div className="coach-grid">{seedTrainers.map((t,i)=><article key={t.id}><div className={`coach c${i}`}/><h3>{t.name}</h3><p>{t.specialty}</p><small>{t.experience} experience</small></article>)}</div></section><section id="contact" className="contact"><article><Kicker>READY TO START?</Kicker><h2>Your strongest chapter begins today.</h2><p><Phone/> +92 300 1234567</p><p><Mail/> hello@ironcore.pk</p><p>Gulshan-e-Iqbal, Karachi</p></article><form onSubmit={e=>{e.preventDefault();alert('Message sent!');e.currentTarget.reset()}}><input required placeholder="Full name"/><input required type="email" placeholder="Email address"/><textarea required placeholder="How can we help?"/><button>Send message <ArrowRight/></button></form></section></main><footer className="landing-footer"><b><Flame/> IRON<span>CORE</span></b><p>© 2026 IronCore Fitness. Karachi, Pakistan.</p></footer></div>}
 function Kicker({children}:{children:React.ReactNode}){return <small className="kicker">{children}</small>}function Heading({kicker,title}:{kicker:string,title:string}){return <div className="heading"><Kicker>{kicker}</Kicker><h2>{title}</h2></div>}function Card({icon,title,text}:{icon:React.ReactNode,title:string,text:string}){return <article><i>{icon}</i><h3>{title}</h3><p>{text}</p></article>}
 function Auth({forgot,back,done,switcher}:{forgot:boolean,back:()=>void,done:()=>void,switcher:()=>void}){return <main className="auth"><button className="auth-brand" onClick={back}><Flame/>IRON<span>CORE</span></button><form onSubmit={e=>{e.preventDefault();forgot?alert('Reset link sent'):done()}}><Kicker>ADMIN PORTAL</Kicker><h1>{forgot?'Reset password':'Welcome back'}</h1><p>{forgot?'Enter your email to receive instructions.':'Sign in to manage your gym operations.'}</p><label>Email<input required type="email" defaultValue={forgot?'':'admin@ironcore.pk'}/></label>{!forgot&&<label>Password<input required type="password" defaultValue="admin123"/></label>}<button className="lime">{forgot?'Send reset link':'Login to dashboard'}<ArrowRight/></button><button type="button" className="text-button" onClick={switcher}>{forgot?'Back to login':'Forgot password?'}</button><small>Demo: admin@ironcore.pk / admin123</small></form></main>}
 const nav:[[string,React.ElementType]]=[['Overview',LayoutDashboard],['Members',Users],['Trainers',UserCheck],['Memberships',WalletCards],['Attendance',CalendarCheck],['Workout & Diet',ClipboardList],['Payments',CircleDollarSign],['Profile',User],['Settings',Settings]];
