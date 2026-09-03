@@ -92,7 +92,251 @@ const fields:any={member:[['name','Full name','text'],['email','Email','email'],
 function Crud({title,subtitle,rows,setRows,kind}:any){const[q,setQ]=useState(''),[open,setOpen]=useState(false),[edit,setEdit]=useState<Row|null>(null);const save=(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();const f=new FormData(e.currentTarget),row:any={id:edit?.id||Date.now()};fields[kind].forEach(([k,,t]:string[])=>row[k]=t==='number'?Number(f.get(k)):String(f.get(k)));setRows((x:Row[])=>edit?x.map(a=>a.id===row.id?row:a):[row,...x]);setOpen(false)};const list=rows.filter((r:Row)=>r.name.toLowerCase().includes(q.toLowerCase()));return <><Title title={title} subtitle={`${rows.length} records`} action={<button className="primary" onClick={()=>{setEdit(null);setOpen(true)}}><Plus/>Add new</button>}/><section className="table-card"><div className="tools"><label><Search/><input value={q} onChange={e=>setQ(e.target.value)} placeholder={`Search ${title.toLowerCase()}...`}/></label><select><option>All records</option><option>Active</option><option>Expired</option></select></div><div className="table-scroll"><table><thead><tr>{fields[kind].slice(0,6).map((x:string[]) =><th key={x[0]}>{x[1]}</th>)}<th>Actions</th></tr></thead><tbody>{list.map((r:Row)=><tr key={r.id}>{fields[kind].slice(0,6).map(([k]:string[])=><td key={k}>{k==='status'||k==='type'?<Status value={String(r[k])}/>:<span>{r[k]}</span>}</td>)}<td><button onClick={()=>{setEdit(r);setOpen(true)}}><Edit3/></button><button className="danger" onClick={()=>confirm('Delete this record?')&&setRows((x:Row[])=>x.filter(a=>a.id!==r.id))}><Trash2/></button></td></tr>)}</tbody></table></div></section>{open&&<Modal title={edit?`Edit ${kind}`:`Add ${kind}`} close={()=>setOpen(false)}><form className="form" onSubmit={save}>{fields[kind].map(([k,l,t]:string[])=><label key={k}>{l}<input required name={k} type={t} defaultValue={edit?.[k]}/></label>)}<button className="primary">Save record</button></form></Modal>}</>}
 function Plans({rows,setRows}:any){const[open,setOpen]=useState(false);const save=(e:React.FormEvent<HTMLFormElement>)=>{e.preventDefault();const f=new FormData(e.currentTarget);setRows((x:Row[])=>[...x,{id:Date.now(),name:String(f.get('name')),duration:String(f.get('duration')),price:Number(f.get('price')),features:String(f.get('features')),status:'Active'}]);setOpen(false)};return <><Title title="Membership plans" subtitle="Create and manage gym packages" action={<button className="primary" onClick={()=>setOpen(true)}><Plus/>New plan</button>}/><div className="plan-grid">{rows.map((p:Row)=><article key={p.id}><div><h3>{p.name}</h3><Status value={String(p.status)}/></div><b>Rs. {Number(p.price).toLocaleString()}</b><small>{p.duration}</small>{String(p.features).split(', ').map(x=><p key={x}><Check/>{x}</p>)}<footer><button><Edit3/>Edit</button><button onClick={()=>setRows((x:Row[])=>x.filter(a=>a.id!==p.id))}><Trash2/></button></footer></article>)}</div>{open&&<Modal title="New membership plan" close={()=>setOpen(false)}><form className="form" onSubmit={save}><label>Name<input required name="name"/></label><label>Duration<input required name="duration"/></label><label>Price<input required type="number" name="price"/></label><label>Features<input required name="features"/></label><button className="primary">Save plan</button></form></Modal>}</>}
 function Attendance({members}:{members:Row[]}){const[present,setPresent]=useState<number[]>(()=>read('gym-attendance',[]).map(x=>x.id));useEffect(()=>localStorage.setItem('gym-attendance',JSON.stringify(present.map(id=>({id,name:''})))),[present]);return <><Title title="Attendance" subtitle="Mark and review daily check-ins"/><div className="mini-stats"><article><b>{present.length}</b><small>Present today</small></article><article><b>{members.length-present.length}</b><small>Not checked in</small></article><label>Date<input type="date" defaultValue={new Date().toISOString().slice(0,10)}/></label></div><section className="table-card"><table><thead><tr><th>Member</th><th>Plan</th><th>Status</th><th>Check-in</th></tr></thead><tbody>{members.map(m=><tr key={m.id}><td><b>{m.name}</b></td><td>{m.plan}</td><td><Status value={present.includes(m.id)?'Present':'Absent'}/></td><td><button className="mark" onClick={()=>setPresent(x=>x.includes(m.id)?x.filter(a=>a!==m.id):[...x,m.id])}>{present.includes(m.id)?<><Check/>Marked</>:<><Plus/>Mark present</>}</button></td></tr>)}</tbody></table></section></>}
-function Payments({members}:{members:Row[]}){const[paid,setPaid]=useState([1,2,4]);return <><Title title="Payments" subtitle="Track fees, renewals and pending balances" action={<button className="primary"><Plus/>Record payment</button>}/><div className="mini-stats"><article><b>Rs. 428,000</b><small>Collected this month</small></article><article><b>Rs. 42,000</b><small>Pending payments</small></article><article><b>18</b><small>Renewals due</small></article></div><section className="table-card"><table><thead><tr><th>Invoice</th><th>Member</th><th>Plan</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody>{members.map((m,i)=><tr key={m.id}><td>#INV-10{m.id}</td><td><b>{m.name}</b></td><td>{m.plan}</td><td>Rs. {[15000,8000,3000][i%3].toLocaleString()}</td><td><Status value={paid.includes(m.id)?'Paid':'Pending'}/></td><td>{!paid.includes(m.id)&&<button className="mark" onClick={()=>setPaid(x=>[...x,m.id])}>Mark paid</button>}<button onClick={()=>alert(`Invoice ${m.name}: ${m.plan}`)}> Invoice</button></td></tr>)}</tbody></table></section></>}
-function Profile(){return <><Title title="My profile" subtitle="Manage administrator information"/><section className="profile"><header><b>SK</b><div><h2>Shoaib Khan</h2><p>Gym Administrator</p></div><button className="primary"><Edit3/>Edit profile</button></header><div className="profile-grid"><label>Full name<input defaultValue="Shoaib Khan"/></label><label>Email<input defaultValue="admin@ironcore.pk"/></label><label>Phone<input defaultValue="+92 300 1234567"/></label><label>Role<input disabled defaultValue="Administrator"/></label></div><h3>Change password</h3><div className="profile-grid"><label>Current password<input type="password"/></label><label>New password<input type="password"/></label></div><button className="primary">Update password</button></section></>}
+function Payments({ members }: { members: Row[] }) {
+  const [open, setOpen] = useState(false);
+
+  const [payments, setPayments] = useState<any[]>([]);
+
+  const recordPayment = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+
+    const memberId = Number(formData.get("member"));
+    const amount = Number(formData.get("amount"));
+    const method = String(formData.get("method"));
+    const date = String(formData.get("date"));
+
+    const selectedMember = members.find(
+      (member) => member.id === memberId
+    );
+
+    if (!selectedMember) {
+      alert("Member select karo");
+      return;
+    }
+
+    const newPayment = {
+      id: Date.now(),
+      member: selectedMember.name,
+      plan: selectedMember.plan,
+      amount: amount,
+      method: method,
+      date: date,
+      status: "Paid",
+    };
+
+    // ✅ NEW RECORD LIST ME ADD HOGA
+    setPayments((previousPayments) => [
+      newPayment,
+      ...previousPayments,
+    ]);
+
+    alert("Payment successfully added");
+
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <Title
+        title="Payments"
+        subtitle="Track fees and payment records"
+        action={
+          <button
+            type="button"
+            className="primary"
+            onClick={() => setOpen(true)}
+          >
+            <Plus />
+            Record payment
+          </button>
+        }
+      />
+
+      <div className="mini-stats">
+        <article>
+          <b>{payments.length}</b>
+          <small>Total payments</small>
+        </article>
+
+        <article>
+          <b>
+            Rs.{" "}
+            {payments
+              .reduce(
+                (total, payment) =>
+                  total + Number(payment.amount),
+                0
+              )
+              .toLocaleString()}
+          </b>
+
+          <small>Total collected</small>
+        </article>
+
+        <article>
+          <b>{members.length}</b>
+          <small>Total members</small>
+        </article>
+      </div>
+
+      <section className="table-card">
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice</th>
+                <th>Member</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Method</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {payments.length === 0 ? (
+                <tr>
+                  <td colSpan={8}>
+                    Abhi koi payment record nahi hai
+                  </td>
+                </tr>
+              ) : (
+                payments.map((payment) => (
+                  <tr key={payment.id}>
+                    <td>
+                      #INV-{String(payment.id).slice(-6)}
+                    </td>
+
+                    <td>
+                      <b>{payment.member}</b>
+                    </td>
+
+                    <td>{payment.plan}</td>
+
+                    <td>
+                      Rs.{" "}
+                      {Number(
+                        payment.amount
+                      ).toLocaleString()}
+                    </td>
+
+                    <td>{payment.method}</td>
+
+                    <td>{payment.date}</td>
+
+                    <td>
+                      <Status value={payment.status} />
+                    </td>
+
+                    <td>
+                      <button
+                        className="danger"
+                        type="button"
+                        onClick={() =>
+                          setPayments((oldPayments) =>
+                            oldPayments.filter(
+                              (p) => p.id !== payment.id
+                            )
+                          )
+                        }
+                      >
+                        <Trash2 />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {open && (
+        <Modal
+          title="Record payment"
+          close={() => setOpen(false)}
+        >
+          <form
+            className="form"
+            onSubmit={recordPayment}
+          >
+            <label>
+              Member
+              <select name="member" required>
+                <option value="">
+                  Select member
+                </option>
+
+                {members.map((member) => (
+                  <option
+                    key={member.id}
+                    value={member.id}
+                  >
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Amount
+              <input
+                type="number"
+                name="amount"
+                min="1"
+                required
+                placeholder="Enter amount"
+              />
+            </label>
+
+            <label>
+              Payment Method
+              <select name="method" required>
+                <option value="">
+                  Select method
+                </option>
+                <option value="Cash">Cash</option>
+                <option value="Bank Transfer">
+                  Bank Transfer
+                </option>
+                <option value="Card">Card</option>
+                <option value="JazzCash">
+                  JazzCash
+                </option>
+                <option value="EasyPaisa">
+                  EasyPaisa
+                </option>
+              </select>
+            </label>
+
+            <label>
+              Payment Date
+              <input
+                type="date"
+                name="date"
+                defaultValue={new Date()
+                  .toISOString()
+                  .slice(0, 10)}
+                required
+              />
+            </label>
+
+            <button
+              type="submit"
+              className="primary"
+            >
+              <Plus />
+              Save Payment
+            </button>
+          </form>
+        </Modal>
+      )}
+    </>
+  );
+}function Profile(){return <><Title title="My profile" subtitle="Manage administrator information"/><section className="profile"><header><b>SK</b><div><h2>Shoaib Khan</h2><p>Gym Administrator</p></div><button className="primary"><Edit3/>Edit profile</button></header><div className="profile-grid"><label>Full name<input defaultValue="Shoaib Khan"/></label><label>Email<input defaultValue="admin@ironcore.pk"/></label><label>Phone<input defaultValue="+92 300 1234567"/></label><label>Role<input disabled defaultValue="Administrator"/></label></div><h3>Change password</h3><div className="profile-grid"><label>Current password<input type="password"/></label><label>New password<input type="password"/></label></div><button className="primary">Update password</button></section></>}
 function SettingsView({dark,setDark}:any){const[n,setN]=useState(true);return <><Title title="Settings" subtitle="Control appearance, notifications and gym details"/><div className="settings"><section><h3>Appearance</h3><button onClick={()=>setDark(!dark)}><span>{dark?<Moon/>:<Sun/>}{dark?'Dark mode':'Light mode'}</span><i className={dark?'switch on':'switch'}/></button></section><section><h3>Notifications</h3><button onClick={()=>setN(!n)}><span><Bell/>Email and payment notifications</span><i className={n?'switch on':'switch'}/></button></section><section><h3>Gym information</h3><div className="profile-grid"><label>Gym name<input defaultValue="IronCore Fitness"/></label><label>Email<input defaultValue="hello@ironcore.pk"/></label><label>Phone<input defaultValue="+92 300 1234567"/></label><label>Opening hours<input defaultValue="Open 24/7"/></label></div><button className="primary">Save changes</button></section></div></>}
 function Status({value}:{value:string}){return <span className={`status ${value.toLowerCase()}`}>{value}</span>}function Modal({title,close,children}:{title:string,close:()=>void,children:React.ReactNode}){return <div className="modal-bg"><section className="modal"><header><h2>{title}</h2><button onClick={close}><X/></button></header>{children}</section></div>}
